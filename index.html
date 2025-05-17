@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CyberKidz Reclaim</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Press Start 2P', cursive;
+      background-color: #a2cce2;
+    }
+    #gameContainer {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+      z-index: 1;
+      position: relative;
+    }
+    #startScreen {
+      z-index: 10;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 20px;
+      background: #a2cce2;
+      color: #1e0e28;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      box-sizing: border-box;
+    }
+    .intro-box {
+      background-color: #ffde59;
+      color: #1e0e28;
+      padding: 20px;
+      margin: 20px;
+      border-radius: 15px;
+      max-width: 600px;
+      font-size: 10px;
+      line-height: 1.8;
+      text-align: center;
+    }
+    .weapon-button {
+      width: 120px;
+      height: 160px;
+      border-radius: 15px;
+      border: none;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      background-color: #f2f2f2;
+      color: #1e0e28;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .weapon-button img {
+      width: 64px;
+      height: 64px;
+    }
+    .weapon-button:disabled {
+      background-color: #f2f2f2;
+      color: #aaa;
+      cursor: default;
+    }
+    .weapon-button:disabled img {
+      opacity: 0.5;
+    }
+    #rankingTable {
+      margin-top: 40px;
+      border-collapse: collapse;
+      width: 90%;
+      max-width: 600px;
+      background: #ffffffcc;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 10px #00000044;
+    }
+    #rankingTable th, #rankingTable td {
+      padding: 12px 16px;
+      text-align: center;
+      font-size: 12px;
+    }
+    #rankingTable th {
+      background-color: #ff5757;
+      color: #ffffff;
+    }
+    #rankingTable tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    #rankingTable tr:nth-child(odd) {
+      background-color: #e2e2e2;
+    }
+    #gameOverScreen {
+      z-index: 15;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000000;
+      color: white;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+<div id="gameContainer">
+  <div id="startScreen">
+    <img src="./assets/cyberkidz-club-logo.png" width="400" alt="CyberKidz Club Logo" style="margin-bottom: 20px;" />
+    <h1 style="font-size: 17px;">CyberKidz Reclaim</h1>
+    <div class="intro-box">
+      After the invasion of the dome, mutated CyberKidz spread chaos across the land. As the last pure warrior, Cyan ventures beyond the dome to gather rare resources and forge powerful weapons.<br><br>
+      Survive relentless mutant waves, grow stronger, and reclaim what was lost.<br><br>
+      The fate of Doma now depends on you.
+    </div>
+    <p>Choose your weapon:</p>
+    <div style="display:flex; gap:10px; flex-wrap: wrap; justify-content: center;">
+      <button class="weapon-button" onclick="startGame('range')">
+        <img src="./assets/blaster-icon.png" alt="Blaster">
+        Blaster
+      </button>
+      <button class="weapon-button" disabled>
+        <img src="./assets/sword-icon.png" alt="Sword">
+        Sword
+      </button>
+      <button class="weapon-button" disabled>
+        <img src="./assets/lash-icon.png" alt="Lash">
+        Lash
+      </button>
+    </div>
+    <table id="rankingTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>WALLET</th>
+          <th>TIME</th>
+          <th>WEAPON</th>
+          <th>SCORE</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Dados do ranking -->
+      </tbody>
+    </table>
+  </div>
+  <div id="gameOverScreen">
+    <h2 style="color:#ff3333; font-size:36px; margin-bottom:20px;">GAME OVER</h2>
+    <div id="gameOverHighlight" style="margin-bottom: 20px; text-align: center;"></div>
+    <table id="gameOverRanking" style="width: 90%; max-width: 600px; background: #ffffff22; border-collapse: collapse; text-align: center; font-size: 12px;">
+      <thead>
+        <tr style="background: #ff5757; color: white;">
+          <th>#</th>
+          <th>WALLET</th>
+          <th>WEAPON</th>
+          <th>TIME</th>
+          <th>SCORE</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Top 10 será inserido dinamicamente -->
+      </tbody>
+    </table>
+    <button onclick="location.reload()" style="margin-top: 20px; padding:10px 20px; font-size:16px; border-radius:10px; border:none; cursor:pointer;">
+      Restart
+    </button>
+  </div>
+</div>
+<script>
+function startGame(weaponType) {
+  document.getElementById('startScreen').style.display = 'none';
+  const script = document.createElement('script');
+  script.src = './main.js';
+  document.body.appendChild(script);
+}
+</script>
+</body>
+</html>
